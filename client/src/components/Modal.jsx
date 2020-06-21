@@ -11,14 +11,13 @@ class Modal extends React.Component {
 
     this.state = {
       names: null,
-      selected: '',
-      value: '',
       abilities: [],
       id: 0,
       moves: [],
       name: '',
       sprites: {},
       stats: [],
+      moduleCount: 0,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -49,22 +48,31 @@ class Modal extends React.Component {
     if (value !== '' || value !== 'Please Select A Pokemon') {
       axios.get(`https://pokeapi.co/api/v2/pokemon/${value}/`)
         .then((res) => {
+          const response = res.data;
+
+          const tempMoves = [];
+
+          response.moves.map((move) => tempMoves.push(move.move));
+
           const {
-            abilities,
             id,
-            moves,
             name,
-            sprites,
-            stats,
-          } = res.data;
-          this.setState({
             abilities,
-            id,
-            moves,
-            name,
-            sprites,
             stats,
-          });
+          } = response;
+
+          const temp = {
+            id,
+            name,
+            abilities,
+            sprites: {
+              front_default: response.sprites.front_default,
+            },
+            stats,
+            moves: tempMoves,
+          };
+
+          this.setState(temp);
         })
         .catch((err) => {
           throw err;
@@ -72,8 +80,35 @@ class Modal extends React.Component {
     }
   }
 
-  handleClick(e) {
-    console.log(e.target);
+  handleClick() {
+    const { swipeData } = this.props;
+    const {
+      abilities,
+      id,
+      moves,
+      name,
+      sprites,
+      stats,
+      moduleCount,
+    } = this.state;
+    axios.post('/store', {
+      id,
+      abilities,
+      moves,
+      name,
+      sprites,
+      stats,
+    })
+      .then((res) => {
+        const temp = moduleCount + 1;
+        this.setState({
+          moduleCount: temp,
+        });
+        swipeData(moduleCount);
+      })
+      .catch((err) => {
+        throw err;
+      });
   }
 
   render() {
@@ -93,7 +128,7 @@ class Modal extends React.Component {
     if (Object.keys(sprites).length === 0) {
       sprite = <div />;
     } else {
-      sprite = <img src={sprites.front_default} alt={'Image of the Pokemon '.concat(name)} />;
+      sprite = <img className="modal-image" src={sprites.front_default} alt={'Image of the Pokemon '.concat(name)} />;
     }
 
     if (names) {
@@ -114,13 +149,17 @@ class Modal extends React.Component {
               </select>
             </div>
             <div className="info-container">
-              <div className="pokemon sprites">
+              <div className="pokemon-sprites">
                 {sprite}
               </div>
               <div className="info">
-                <Stats className="pokemon stats" key={'stats'.concat(id.toString())} stats={stats} id={id} />
-                <Abilities className="pokemon abilities" key={'abilities'.concat(id.toString())} abilities={abilities} id={id} />
-                <Moves className="pokemon moves" key={'moves'.concat(id.toString())} moves={moves} id={id} />
+                <div className="stats-title">
+                  <Stats className="pokemon-stats" key={'stats'.concat(id.toString())} stats={stats} id={id} />
+                </div>
+                <Abilities className="pokemon-abilities" key={'abilities'.concat(id.toString())} abilities={abilities} id={id} />
+                <div className="moves-title">
+                  <Moves className="pokemon-moves" key={'moves'.concat(id.toString())} moves={moves} id={id} />
+                </div>
               </div>
             </div>
             <div className="add-container">

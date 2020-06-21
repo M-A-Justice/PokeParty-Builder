@@ -9,13 +9,27 @@ class App extends React.Component {
     this.state = {
       moduleCount: 0,
       clicked: false,
+      abilities: [],
+      id: 0,
+      moves: [],
+      name: '',
+      sprites: {},
+      stats: [],
     };
 
     this.handleClick = this.handleClick.bind(this);
+    this.saveData = this.saveData.bind(this);
+    this.swipeData = this.swipeData.bind(this);
   }
 
   componentDidMount() {
     // fetch users team from database
+  }
+
+  swipeData(moduleCount) {
+    this.setState({
+      moduleCount,
+    });
   }
 
   handleClick(e) {
@@ -34,8 +48,21 @@ class App extends React.Component {
     }
   }
 
+  saveData() {
+    // axios post to db here
+  }
+
   render() {
-    const { moduleCount, clicked } = this.state;
+    const {
+      moduleCount,
+      clicked,
+      id,
+      abilities,
+      moves,
+      name,
+      sprites,
+      stats,
+    } = this.state;
     let modal = 'hide-modal';
     if (clicked === true) {
       modal = 'show-modal';
@@ -43,7 +70,7 @@ class App extends React.Component {
     if (moduleCount < 6) {
       return (
         <div className="main">
-          <Modal className={modal} click={this.handleClick} />
+          <Modal className={modal} click={this.handleClick} swipeData={this.swipeData} />
           <div className="nav" />
           <div className="module-container">
             <button className="add-module" type="button" onClick={this.handleClick}>
@@ -54,14 +81,24 @@ class App extends React.Component {
               </div>
               <div className="bottom" />
             </button>
-            <Modules />
+            <Modules
+              id={id}
+              name={name}
+              abilities={abilities}
+              moves={moves}
+              sprites={sprites}
+              stats={stats}
+            />
           </div>
         </div>
       );
     }
     return (
       <div className="main">
-        <div className="nav">Header</div>
+        <div className="nav">
+          <div>PokeTeam Creator</div>
+          <button className="save-modules" type="button" onClick={this.saveData}>Save</button>
+        </div>
         <div className="module-container">
           <Modules />
         </div>

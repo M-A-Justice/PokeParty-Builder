@@ -6,7 +6,7 @@ const Moves = (props) => {
   const { moves, className } = props;
   return (
     <ul className={className}>
-      {moves.map((move) => <Move key={move.move.name} move={move.move.name} />)}
+      {moves.map((move) => <Move key={move.name} move={move.name} />)}
     </ul>
   );
 };
